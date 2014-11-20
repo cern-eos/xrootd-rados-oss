@@ -71,10 +71,21 @@ RadosOssFile::Open(const char *path, int flags, mode_t mode, XrdOucEnv &env)
 
   if (flags & O_CREAT)
     ret = mFile->create(-1, std::string(""), env.Get("rfs.stripe") ? atoi(env.Get("rfs.stripe")) : 0 );
+  else 
+  {
+    if (!mFile->exists())
+      ret = -ENOENT;
+    else if (!mFile->isReadable())
+      ret = -EPERM;
+  }
 
-  if (flags & O_TRUNC)
-    ret = mFile->truncate(0);
-
+  if ( (!ret) && (flags & O_TRUNC)) {
+    if (env.Get("oss.size")) {
+      ret = mFile->truncate(strtoull(env.Get("oss.size"),0,10));
+    } else {
+      ret = mFile->truncate(0);
+    }
+  }
   return ret;
 }
 
