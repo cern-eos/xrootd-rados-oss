@@ -1,6 +1,6 @@
 %define _unpackaged_files_terminate_build 0
 Name:		xrootd-rados-oss
-Version:	0.1.1
+Version:	0.1.2
 Release:	1
 Summary:	XRootD OSS plugin for RADOS pools (CEPH)
 Prefix:         /usr
