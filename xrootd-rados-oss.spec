@@ -12,10 +12,15 @@ BuildRoot:     %{_tmppath}/%{name}-root
 
 BuildRequires: cmake >= 2.6
 BuildRequires: radosfs-devel >= 0.4
-BuildRequires: xrootd4-server-devel >= 4.0
-BuildRequires: xrootd4-private-devel >= 4.0
+BuildRequires: xrootd-server-devel >= 4.0
+BuildRequires: xrootd-private-devel >= 4.0
 
-Requires: radosfs >= 0.4 xrootd4 >= 4.0
+%if %{?_EXTRA_REQUIRES:1}%{!?_EXTRA_REQUIRES:0}
+BuildRequires: %{_EXTRA_REQUIRES}
+Requires:      %{_EXTRA_REQUIRES}
+%endif
+
+Requires: radosfs >= 0.5 xrootd4 >= 4.0
 
 
 %description
@@ -28,6 +33,10 @@ XRootD OSS plugin for RADOS pools (CEPH)
 test -e $RPM_BUILD_ROOT && rm -r $RPM_BUILD_ROOT
 %if 0%{?rhel} < 6
 export CC=/usr/bin/gcc44 CXX=/usr/bin/g++44
+%endif
+
+%if %{?_BOOST_ROOT:1}%{!?_BOOST_ROOT:0}
+export BOOST_ROOT=%{_BOOST_ROOT} Boost_NO_SYSTEM_PATHS=ON
 %endif
 
 mkdir -p build
