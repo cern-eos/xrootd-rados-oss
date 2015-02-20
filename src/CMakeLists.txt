@@ -1,5 +1,6 @@
 find_package( XRootD REQUIRED )
 find_package( LibRadosFs REQUIRED )
+find_package( Boost REQUIRED COMPONENTS thread )
 
 add_library( RadosOss SHARED
              RadosOss.cc RadosOss.hh
