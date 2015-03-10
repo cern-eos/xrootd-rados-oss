@@ -36,12 +36,12 @@ export CC=/usr/bin/gcc44 CXX=/usr/bin/g++44
 %endif
 
 %if %{?_BOOST_ROOT:1}%{!?_BOOST_ROOT:0}
-export BOOST_ROOT=%{_BOOST_ROOT} Boost_NO_SYSTEM_PATHS=TRUE
+export BOOST_ROOT=%{_BOOST_ROOT} 
 %endif
 
 mkdir -p build
 cd build
-cmake ../ -DRELEASE=%{release} -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake ../ -DRELEASE=%{release} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBoost_NO_SYSTEM_PATHS=ON
 %{__make} %{_smp_mflags} 
 
 %install
