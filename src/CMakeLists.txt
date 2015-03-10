@@ -9,7 +9,7 @@ add_library( RadosOss SHARED
              RadosOssDefines.hh
 )
 
-include_directories( ${XROOTD_INCLUDE_DIR} ${RADOS_FS_INCLUDE_DIR} )
+include_directories( ${Boost_INCLUDE_DIR} ${XROOTD_INCLUDE_DIR} ${RADOS_FS_INCLUDE_DIR} )
 
 add_definitions( -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 )
 
