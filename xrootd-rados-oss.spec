@@ -36,7 +36,7 @@ export CC=/usr/bin/gcc44 CXX=/usr/bin/g++44
 %endif
 
 %if %{?_BOOST_ROOT:1}%{!?_BOOST_ROOT:0}
-export BOOST_ROOT=%{_BOOST_ROOT} Boost_NO_SYSTEM_PATHS=ON
+export BOOST_ROOT=%{_BOOST_ROOT} Boost_NO_SYSTEM_PATHS=TRUE
 %endif
 
 mkdir -p build
