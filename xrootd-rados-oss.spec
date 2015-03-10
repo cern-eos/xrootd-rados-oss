@@ -20,7 +20,7 @@ BuildRequires: %{_EXTRA_REQUIRES}
 Requires:      %{_EXTRA_REQUIRES}
 %endif
 
-Requires: radosfs >= 0.5 xrootd4 >= 4.0
+Requires: radosfs >= 0.5 xrootd >= 4.0
 
 
 %description
