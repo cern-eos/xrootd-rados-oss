@@ -39,7 +39,12 @@ public:
   virtual ssize_t Read(void *buff, off_t offset, size_t blen);
   virtual int Fstat(struct stat *buff);
   virtual ssize_t Write(const void *buff, off_t offset, size_t blen);
+  virtual int Fstat(struct stat *buff);
+  virtual int Fsync(void);
+  virtual int Fchmod(mode_t );
+  virtual int Ftruncate(unsigned long long);
   virtual int getFD() { return fd; }
+  virtual int isCompressed(const char* x ) { return 0;}
 
 private:
   radosfs::Filesystem *mRadosFs;

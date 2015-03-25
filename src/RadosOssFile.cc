@@ -94,6 +94,75 @@ RadosOssFile::Read(void *buff, off_t offset, size_t blen)
   return mFile->read((char *) buff, offset, blen);
 }
 
+int 
+RadosOssFile::Read(XrdSfsAio *aiop) 
+{
+  // we do synchronous read ... the asynchronous upstream part is unclear and creates SEGVs
+  int rc = Read((char*)aiop->sfsAio.aio_buf, aiop->sfsAio.aio_offset, aiop->sfsAio.aio_nbytes);
+  aiop->Result = rc;
+  aiop->doneRead();
+  return 0;
+
+  /*
+  std::vector<radosfs::FileReadData> readvector;
+  readvector.push_back(radosfs::FileReadData((char*)aiop->sfsAio.aio_buf, aiop->sfsAio.aio_offset, aiop->sfsAio.aio_nbytes));
+  radosfs::Callback callme(RadosOssFile::ReadCB, (void*) aiop);
+  int rc =  mFile->read(readvector,0, callme);
+  return rc;
+  */
+}
+
+
+ssize_t
+RadosOssFile::ReadRaw(void *buff, off_t offset, size_t blen) 
+{
+  return Read(buff, offset, blen);
+}
+
+ssize_t 
+RadosOssFile::ReadV(XrdOucIOVec *readV, int n)
+{
+  std::vector<radosfs::FileReadData> rvec;
+  std::vector<ssize_t> frd_retc;
+  std::string asyncOpId;
+
+  // pupulate the vector read data structure                                                                                                                                                  
+  for (int i=0; i<n; ++i) {
+    frd_retc.push_back(0);
+    radosfs::FileReadData frd(readV[i].data, readV[i].offset, readV[i].size &frd_retc.back());
+    rvec.push_back(frd);
+  }
+
+  ssize_t rbytes = mFile->read(rvec,&asyncOpId);
+
+  mFile->sync(asyncOpId);
+  
+  // verify no vector read error                                                                                                                                                              
+  for (size_t i = 0; i < frd_retc.size(); ++i) {
+    if (frd_retc[i] < 0) {
+      return -1;
+    }
+  }
+}
+
+int
+RadosOssFile::Ftruncate(unsigned long long size)
+{
+  return mFile->truncate(size);
+}
+
+int
+RadosOssFile::Fchmod(mode_t mode)
+{
+  return mFile->chmod(mode);
+}
+
+int
+RadosOssFile::Fsync()
+{
+  return mFile->sync();
+}
+
 int
 RadosOssFile::Fstat(struct stat *buff)
 {
