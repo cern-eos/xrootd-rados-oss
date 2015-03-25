@@ -34,11 +34,14 @@ public:
   virtual int Opendir(const char *, XrdOucEnv &);
   virtual int Readdir(char *buff, int blen);
   virtual int Close(long long *retsz=0);
+  virtual int StatRet(struct stat *buff);
 
 private:
   radosfs::Filesystem *mRadosFs;
   radosfs::Dir *mDir;
+  struct stat *mStat;
   int mNextEntry;
+  std::map<std::string, struct stat> mStatMap;
 };
 
 #endif /* __RADOS_OSS_DIR_HH__ */

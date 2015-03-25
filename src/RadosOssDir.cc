@@ -31,7 +31,8 @@ RadosOssDir::RadosOssDir(radosfs::Filesystem *radosFs,
                          const XrdSysError &eroute)
   : mRadosFs(radosFs),
     mDir(0),
-    mNextEntry(0)
+    mNextEntry(0),
+    mStat(0)
 {
 }
 
@@ -46,6 +47,7 @@ RadosOssDir::Opendir(const char *path, XrdOucEnv &env)
   uid_t uid = env.GetInt("uid");
   gid_t gid = env.GetInt("gid");
 
+  uid = gid = 0;
   mRadosFs->setIds(uid, gid);
 
   mDir = new radosfs::Dir(mRadosFs, path);
@@ -60,6 +62,29 @@ RadosOssDir::Opendir(const char *path, XrdOucEnv &env)
     return -EACCES;
 
   mDir->update();
+
+  std::set<std::string> entries;
+  std::set<std::string>::const_iterator it;
+  std::vector<std::string> v_paths;
+  std::vector<std::string> s_paths;
+
+  mDir->entryList(entries);
+
+  for (it=entries.begin(); it!=entries.end(); ++it) {
+    std::string s_path = mDir->path() + *it;
+    v_paths.push_back(s_path);
+    s_paths.push_back(*it);
+  }
+    
+  std::vector<std::pair<int, struct stat> > l_stats = mRadosFs->stat(v_paths);
+
+  std::vector<std::pair<int, struct stat> >::const_iterator v_it;
+
+  for (size_t i = 0; i< l_stats.size(); ++i) {
+    if (!l_stats[i].first) {
+      mStatMap[s_paths[i]] = l_stats[i].second;
+    }
+  }
 
   return XrdOssOK;
 }
@@ -90,5 +115,18 @@ RadosOssDir::Readdir(char *buff, int blen)
 
   buff[ret] = '\0';
 
+  if (mStat && mStatMap.count(buff)) {
+    memcpy(mStat, &mStatMap[buff], sizeof(struct stat));
+  }
+
+  return XrdOssOK;
+}
+
+int
+RadosOssDir::StatRet(struct stat *buff)
+{
+  if (!mDir)
+    return -ENODEV; 
+  mStat = buff;
   return XrdOssOK;
 }
