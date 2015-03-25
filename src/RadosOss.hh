@@ -63,6 +63,8 @@ public:
   virtual ~RadosOss();
   XrdSysMutex mutex;
 
+  static bool gWriteIsSync;
+
 private:
   int loadInfoFromConfig(const char *pluginConf,
                          std::string &configPath,
@@ -75,6 +77,7 @@ private:
   radosfs::Filesystem mRadosFs;
 
   std::vector<RadosOssPool> mPools;
+
 };
 
 #endif /* __RADOS_OSS_HH__ */

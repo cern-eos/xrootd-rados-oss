@@ -55,6 +55,8 @@ extern "C"
   }
 }
 
+bool RadosOss::gWriteIsSync = false;
+
 RadosOss::RadosOss()
 {
 }
@@ -186,6 +188,21 @@ RadosOss::loadInfoFromConfig(const char *pluginConf,
 	mRadosFs.setFileStripeSize(stripe);
 	OssEroute.Say(LOG_PREFIX "Set default stripesize ", sstripe);
       }
+    }
+    else if (strcmp(var, RADOS_CONFIG_WRITE) == 0)
+    {
+      char* mode = Config.GetWord();
+      std::string smode = mode;
+      if ( !mode || ( ( smode != "sync" ) && ( smode != "async") ) ) {
+	fprintf(stderr,"error: illegal write mode configured - must be 'sync' or 'async' but %s='%s'\n", RADOS_CONFIG_WRITE, mode);
+	Config.Close();
+	return -1;
+      }
+
+      if (smode == "sync") 
+	gWriteIsSync = true;
+
+      OssEroute.Say(LOG_PREFIX "Set write mode ", mode);
     }
   }
 

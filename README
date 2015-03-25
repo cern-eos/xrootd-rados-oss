@@ -42,6 +42,11 @@ is 128M. You can change the default size with:
   
   radososs.stripe 16777216
 
+By default the synchronouss write implemention uses asynchronous writes. If you want it 
+to really be synchronous use this setting:
+
+  radososs.write sync
+
 **IMPORTANT:** In order for the plugin to work correctly, it is also necessary to
 disable *send file* and *async* in XRootD. This is done by adding the following
 line to the configuration file:
