@@ -25,7 +25,7 @@
 #include <vector>
 #include <radosfs/Filesystem.hh>
 #include <radosfs/File.hh>
-
+#include <radosfs/Callback.hh>
 #include "RadosOss.hh"
 
 class RadosOssFile : public XrdOssDF
@@ -35,9 +35,14 @@ public:
   virtual ~RadosOssFile();
   virtual int Open(const char *path, int flags, mode_t mode, XrdOucEnv &env);
   virtual int Close(long long *retsz=0);
+  static  void ReadCB(radosfs::Callback::callback_data*);
+  static  void WriteCB(radosfs::Callback::callback_data*);
   virtual ssize_t Read(off_t offset, size_t blen);
   virtual ssize_t Read(void *buff, off_t offset, size_t blen);
-  virtual int Fstat(struct stat *buff);
+  virtual int Read(XrdSfsAio *aoip);
+  virtual ssize_t ReadRaw(void *, off_t, size_t);
+  virtual ssize_t ReadV(XrdOucIOVec *readV, int n);
+  virtual int Write(XrdSfsAio *aiop);
   virtual ssize_t Write(const void *buff, off_t offset, size_t blen);
   virtual int Fstat(struct stat *buff);
   virtual int Fsync(void);

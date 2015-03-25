@@ -23,6 +23,8 @@
 #include <fcntl.h>
 #include <private/XrdOss/XrdOssError.hh>
 #include <XrdOuc/XrdOucEnv.hh>
+#include <XrdSfs/XrdSfsAio.hh>
+
 #include <stdio.h>
 #include <string>
 #include <radosfs/File.hh>
@@ -77,6 +79,22 @@ RadosOssFile::Open(const char *path, int flags, mode_t mode, XrdOucEnv &env)
     ret = mFile->truncate(0);
 
   return ret;
+}
+
+void
+RadosOssFile::ReadCB(radosfs::Callback::callback_data* data)
+{
+  XrdSfsAio* aiop = (XrdSfsAio*) data->caller;
+  aiop->Result = (!data->retc)?aiop->sfsAio.aio_nbytes:data->retc;
+  aiop->doneRead();
+}
+
+void
+RadosOssFile::WriteCB(radosfs::Callback::callback_data* data)
+{
+  XrdSfsAio* aiop = (XrdSfsAio*) data->caller;
+  aiop->Result = (!data->retc)?aiop->sfsAio.aio_nbytes:-data->retc;
+  aiop->doneWrite();
 }
 
 ssize_t
@@ -172,8 +190,13 @@ RadosOssFile::Fstat(struct stat *buff)
 ssize_t
 RadosOssFile::Write(const void *buff, off_t offset, size_t blen)
 {
-  int ret = mFile->write((char *) buff, offset, blen);
+  int ret = 0;
 
+  if (RadosOss::gWriteIsSync) {
+    ret = mFile->writeSync((char *) buff, offset, blen);
+  } else {
+    ret = mFile->write((char *) buff, offset, blen);
+  }
   // The libradosfs file write returns 0 if it succeeds but the XRootD OSS Write
   // needs to return the number of bytes instead
   if (ret == 0)
@@ -181,3 +204,12 @@ RadosOssFile::Write(const void *buff, off_t offset, size_t blen)
 
   return ret;
 }
+
+int 
+RadosOssFile::Write(XrdSfsAio *aiop) 
+{
+  radosfs::Callback callme(RadosOssFile::WriteCB, (void*) aiop);
+  
+  return mFile->write((const char*)aiop->sfsAio.aio_buf, aiop->sfsAio.aio_offset, aiop->sfsAio.aio_nbytes, false, callme);
+}
+
