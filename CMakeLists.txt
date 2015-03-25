@@ -19,7 +19,7 @@
 # Project description
 #-------------------------------------------------------------------------------
 set( VERSION_MAJOR "0" )
-set( VERSION_MINOR "1" )
+set( VERSION_MINOR "3" )
 set( VERSION_PATCH "1")
 
 cmake_minimum_required( VERSION 2.6 )
